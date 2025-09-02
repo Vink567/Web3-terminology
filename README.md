@@ -55,7 +55,7 @@
 
 <p>
   <a href="https://github.com/Vink567">
-    <img src="https://github.com/Vink567.png" alt="Vink567 GitHub avatar" width="64" height="64" style="border-radius:50%;" />
+      <img src="https://images.weserv.nl/?url=github.com/Vink567.png&w=64&h=64&fit=cover&mask=circle" alt="Vink567 GitHub avatar" width="64" height="64" />
   </a>
   
 </p>
