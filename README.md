@@ -27,10 +27,8 @@
 
 ## 🖼️ 截图（占位）
 
-> 将项目截图放在 `./public/screenshots/` 并在此引用
+<img width="1103" height="1196" alt="bg" src="https://github.com/user-attachments/assets/87390ebc-7452-40ab-bbc6-e32bc001d960" />
 
-*
-*
 
 ## 🤝 参与贡献
 
