@@ -25,7 +25,7 @@
 * 术语按 26 个英文字母（A–Z）建立索引与导航
 * 中文术语按英文对照词的首字母归类
 
-## 🖼️ 截图（占位）
+## 🖼️ 截图
 
 <img width="1103" height="1196" alt="bg" src="https://github.com/user-attachments/assets/87390ebc-7452-40ab-bbc6-e32bc001d960" />
 
