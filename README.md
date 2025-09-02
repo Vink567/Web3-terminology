@@ -53,6 +53,8 @@
 
 * &#x20;**@Vink567** · 站点搭建与数据维护
 
+[<img src="https://github.com/Vink567.png" width="88" height="88" alt="Vink567 GitHub avatar" />](https://github.com/Vink567)
+
 以及社区中持续提交 Issue/PR 的贡献者们！
 
 ---
