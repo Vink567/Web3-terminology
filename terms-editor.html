@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web3 术语后台工具</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .admin-wrap { max-width: 980px; margin: 40px auto 80px; padding: 12px; }
+      .panel {
+        padding: 16px; border-radius: 14px; background: var(--glass);
+        border: 1px solid rgba(255,255,255,.12);
+      }
+      .form-row { display: grid; gap: 8px; margin-bottom: 12px; }
+      .form-row input, .form-row textarea {
+        width: 100%; color: var(--text); background: rgba(0,0,0,.25);
+        border: 1px solid rgba(255,255,255,.14); border-radius: 10px; padding: 10px 12px;
+        font-size: 14px;
+      }
+      .btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+      .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: var(--text); cursor: pointer; }
+      .btn.ghost { background: rgba(255,255,255,.04); }
+      .list-panel { margin-top: 18px; }
+      .list-title { font-weight: 700; letter-spacing: 1px; margin: 0 0 10px; color: #cdd7ff; }
+      .item { display: grid; gap: 6px; padding: 12px; margin-bottom: 10px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+      .item-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+      .item-term { font-weight: 700; }
+      .item-actions { display: flex; gap: 8px; }
+      .hint { color: var(--muted); margin-top: 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="admin-wrap">
+      <h1>Web3 术语后台工具</h1>
+      <div class="panel">
+        <div class="form-row">
+          <label for="termInput">术语</label>
+          <input id="termInput" type="text" placeholder="例如：zkRollup" />
+        </div>
+        <div class="form-row">
+          <label for="descInput">解释</label>
+          <textarea id="descInput" rows="5" placeholder="请输入该术语的解释"></textarea>
+        </div>
+        <div class="btn-row">
+          <button id="addBtn" class="btn">添加到列表</button>
+          <button id="saveLocalBtn" class="btn">保存到浏览器</button>
+          <button id="exportBtn" class="btn">导出 JSON</button>
+          <button id="importBtn" class="btn ghost">导入 JSON</button>
+          <input id="fileJson" type="file" accept="application/json,.json" hidden />
+          <button id="clearBtn" class="btn ghost">清空自定义术语</button>
+        </div>
+      </div>
+
+      <div class="panel list-panel">
+        <h2 class="list-title">自定义术语列表</h2>
+        <div id="list"></div>
+        <p class="hint">当前机制：主站仅读取浏览器本地存储（点击“保存到浏览器”生效）。如需文件备份可使用“导出 JSON”。</p>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = 'web3_terms_custom';
+      const termInput = document.getElementById('termInput');
+      const descInput = document.getElementById('descInput');
+      const listEl = document.getElementById('list');
+      const fileInput = document.getElementById('fileJson');
+
+      let items = [];
+
+      function normalize(text){ return (text || '').trim(); }
+      function dedupePush(arr, item){
+        const key = item.term.toLowerCase();
+        const idx = arr.findIndex(i => i.term.toLowerCase() === key);
+        if (idx >= 0) arr[idx] = item; else arr.push(item);
+      }
+      function render(){
+        listEl.innerHTML = '';
+        if (items.length === 0){ listEl.innerHTML = '<div class="hint">暂无自定义术语。</div>'; return; }
+        items
+          .slice()
+          .sort((a,b)=>a.term.localeCompare(b.term))
+          .forEach((it, i)=>{
+            const wrap = document.createElement('div');
+            wrap.className = 'item';
+            const head = document.createElement('div');
+            head.className = 'item-head';
+            const name = document.createElement('div');
+            name.className = 'item-term';
+            name.textContent = it.term;
+            const actions = document.createElement('div');
+            actions.className = 'item-actions';
+            const editBtn = document.createElement('button'); editBtn.className = 'btn ghost'; editBtn.textContent = '编辑';
+            const delBtn = document.createElement('button'); delBtn.className = 'btn ghost'; delBtn.textContent = '删除';
+            editBtn.addEventListener('click', ()=>{ termInput.value = it.term; descInput.value = it.desc; window.scrollTo({ top: 0, behavior: 'smooth' }); });
+            // 按术语名删除，避免因排序导致的索引错位
+            delBtn.addEventListener('click', ()=>{
+              const key = (it.term || '').toLowerCase();
+              const idx = items.findIndex(x => (x.term || '').toLowerCase() === key);
+              if (idx >= 0) { items.splice(idx, 1); render(); }
+            });
+            actions.appendChild(editBtn); actions.appendChild(delBtn);
+            head.appendChild(name); head.appendChild(actions);
+            const desc = document.createElement('div'); desc.textContent = it.desc || '';
+            wrap.appendChild(head); wrap.appendChild(desc);
+            listEl.appendChild(wrap);
+          });
+      }
+
+      function saveToLocal(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); alert('已保存到浏览器'); }
+      function loadFromLocal(){
+        try { const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return; const arr = JSON.parse(raw); if (Array.isArray(arr)) items = arr; } catch {}
+      }
+
+      document.getElementById('addBtn').addEventListener('click', ()=>{
+        const term = normalize(termInput.value); const desc = normalize(descInput.value);
+        if(!term) return alert('请输入术语');
+        dedupePush(items, { term, desc });
+        render();
+        termInput.value = ''; descInput.value = '';
+      });
+
+      document.getElementById('saveLocalBtn').addEventListener('click', saveToLocal);
+
+      document.getElementById('exportBtn').addEventListener('click', ()=>{
+        const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'terms.json'; document.body.appendChild(a); a.click(); a.remove();
+      });
+
+      document.getElementById('importBtn').addEventListener('click', ()=> fileInput.click());
+      fileInput.addEventListener('change', async (e)=>{
+        const file = e.target.files && e.target.files[0]; if(!file) return;
+        try{ const text = await file.text(); const json = JSON.parse(text); if(!Array.isArray(json)) throw new Error('格式必须是数组');
+          for(const it of json){ if(!it) continue; const term = normalize(it.term || it.name); if(!term) continue; const desc = normalize(it.desc || it.description); dedupePush(items, { term, desc }); }
+          render();
+        }catch(err){ alert('导入失败：' + err.message); }
+        e.target.value = '';
+      });
+
+      document.getElementById('clearBtn').addEventListener('click', ()=>{ if(confirm('确认清空所有自定义术语？')){ items = []; render(); }});
+
+      // 初始化
+      loadFromLocal();
+      render();
+    </script>
+  </body>
+  </html>
+
+

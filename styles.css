@@ -1,0 +1,298 @@
+:root {
+  --bg-1: #0b0f19;
+  --bg-2: #0e1222;
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-strong: rgba(255, 255, 255, 0.14);
+  --text: #e7ecf3;
+  --muted: #97a0af;
+  --neon: #7c4dff;
+  --neon-2: #00e5ff;
+  --accent: #00d4ff;
+  --danger: #ff4772;
+  --controls-height: 76px; /* 动态更新，作为粘性分组标题的偏移 */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: radial-gradient(1200px 800px at 10% 10%, rgba(124, 77, 255, 0.25), transparent 60%),
+              radial-gradient(1000px 700px at 90% 20%, rgba(0, 229, 255, 0.25), transparent 60%),
+              linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  background-attachment: fixed;
+}
+
+.bg-effects::before,
+.bg-effects::after {
+  content: "";
+  position: fixed;
+  inset: -20vmax;
+  background: conic-gradient(from 0deg, rgba(124,77,255,.03), rgba(0,229,255,.03), rgba(255,71,114,.03), rgba(124,77,255,.03));
+  filter: blur(40px);
+  z-index: -1;
+  animation: spin 22s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.site-header {
+  padding: 48px 20px 24px;
+  text-align: center;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(124,77,255,.3), rgba(0,229,255,.3));
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(124,77,255,.35), 0 0 0 1px rgba(255,255,255,.08) inset;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+h1 {
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.tagline {
+  margin: 8px auto 0;
+  color: var(--muted);
+  max-width: 720px;
+}
+
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(11,15,25,.75), rgba(11,15,25,.4));
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+/* 当脚本判断需要吸顶时，切换为固定定位并为主体留白 */
+.controls.is-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+}
+
+body.has-fixed-controls {
+  padding-top: calc(var(--controls-height) + 12px);
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 980px;
+  margin: 16px auto;
+  padding: 10px 12px;
+  background: var(--glass);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+
+.search-box input {
+  flex: 1;
+  font-size: 16px;
+  padding: 12px 14px;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.clear-btn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: linear-gradient(135deg, rgba(124,77,255,.2), rgba(0,229,255,.2));
+  color: var(--text);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease;
+}
+
+.clear-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(124,77,255,.25), 0 0 0 1px rgba(255,255,255,.08) inset;
+}
+
+.alpha-index {
+  user-select: none;
+  display: grid;
+  grid-auto-flow: column;
+  gap: 4px;
+  max-width: 980px;
+  margin: 6px auto 16px;
+  padding: 4px 6px;
+  overflow-x: auto;
+}
+
+/* 之前的 JSON 上传/下载操作已移除，相关样式不再需要 */
+
+.alpha-index button {
+  min-width: 28px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.alpha-index button[disabled] {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.results {
+  max-width: 980px;
+  margin: 10px auto 60px;
+  padding: 0 12px;
+}
+
+.group-title {
+  position: static;
+  margin: 24px 0 10px;
+  padding: 6px 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #cdd7ff;
+  background: rgba(15, 20, 35, .72);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  scroll-margin-top: calc(var(--controls-height) + 12px);
+}
+
+.term {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--glass);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+
+.term .name {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.term .desc {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+mark {
+  background: linear-gradient(135deg, rgba(124,77,255,.3), rgba(0,229,255,.3));
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  padding: 40px 0 30px;
+  color: var(--muted);
+}
+
+.empty-emoji { font-size: 32px; }
+
+.site-footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 0 60px;
+}
+
+.footer-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: #cdd7ff;
+}
+
+/* 贡献者头像卡片 */
+.contributors-grid {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin: 12px 0 6px;
+}
+
+.contrib-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar-link {
+  display: block;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,.12);
+  box-shadow: 0 12px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.06) inset;
+  transition: transform .18s ease, box-shadow .2s ease;
+}
+
+.avatar-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 50px rgba(124,77,255,.35), 0 0 0 1px rgba(255,255,255,.08) inset;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.contrib-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mission {
+  margin-top: 10px;
+  color: #9fb3ff;
+}
+
+@media (max-width: 720px) {
+  .avatar-link { width: 80px; height: 80px; }
+}

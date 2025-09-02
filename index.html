@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Web3 术语查询</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="description" content="一个炫酷的 Web3 专业术语查询站点，支持搜索、按字母分组、A-Z 快速索引与高亮。" />
+  </head>
+  <body>
+    <div class="bg-effects" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="brand">
+        <span class="logo">V1</span>
+        <h1>Web3 术语查询</h1>
+      </div>
+      <p class="tagline">快速搜索 · 字母索引 · 高亮匹配 </p>
+    </header>
+
+    <section class="controls">
+      <div class="search-box" role="search">
+        <input id="searchInput" type="text" placeholder="搜索术语，例如：DeFi, Layer 2, zkRollup..." aria-label="搜索 Web3 术语" autocomplete="off" />
+        <button id="clearBtn" class="clear-btn" aria-label="清除搜索">✕</button>
+      </div>
+      <nav id="alphaIndex" class="alpha-index" aria-label="字母快速索引"></nav>
+    </section>
+
+    <main class="results">
+      <div id="emptyState" class="empty-state" hidden>
+        <div class="empty-emoji">🔎</div>
+        <h2>没有找到匹配结果</h2>
+        <p>试试更通用的关键词，或检查拼写。</p>
+      </div>
+      <div id="results" class="groups" aria-live="polite"></div>
+    </main>
+
+    <footer class="site-footer">
+      <h2 class="footer-title">Web3 术语查询贡献者</h2>
+      <div class="contributors-grid">
+        <div class="contrib-card">
+          <a class="avatar-link" href="https://x.com/yuy_567" target="_blank" rel="noopener" aria-label="秋伍柒 | Vink">
+            <img class="avatar" src="https://unavatar.io/x/yuy_567" alt="秋伍柒 | Vink 头像" />
+          </a>
+          <div class="contrib-name">秋伍柒 | Vink</div>
+        </div>
+        <div class="contrib-card">
+          <a class="avatar-link" href="https://x.com/Web3BlockBunny" target="_blank" rel="noopener" aria-label="Block Bunny 兔小白">
+            <img class="avatar" src="https://unavatar.io/x/Web3BlockBunny" alt="Block Bunny 兔小白 头像" />
+          </a>
+          <div class="contrib-name">Block Bunny 兔小白</div>
+        </div>
+      </div>
+      <p class="mission">让 web3 术语不再陌生</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+  </html>
+
+
