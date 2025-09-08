@@ -32,6 +32,9 @@ let TERMS = [
   { term: "zkRollup", desc: "零知识汇总。基于有效性证明（ZKP）的 L2 扩容方案。" },
 ];
 
+// 运行时基础数据源（默认使用内置 TERMS，加载 public/terms.json 成功后覆盖）
+let BASE_TERMS = TERMS;
+
 const A_TO_Z = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
 // 与后台工具一致的本地存储键，用于跨页同步自定义术语
@@ -196,6 +199,21 @@ function normalizeTerms(json) {
   return cleaned;
 }
 
+// 从 public/terms.json 预加载基础词条（失败时回退到内置 TERMS）
+async function loadBaseTermsFromJson() {
+  try {
+    const res = await fetch('public/terms.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('failed to fetch terms.json: ' + res.status);
+    const json = await res.json();
+    const arr = normalizeTerms(json);
+    if (Array.isArray(arr) && arr.length) {
+      BASE_TERMS = arr;
+    }
+  } catch (err) {
+    // 忽略错误，继续使用内置 TERMS 作为回退
+  }
+}
+
 // 读取本地自定义术语（由 terms-editor.html 写入）
 function readCustomFromLocal() {
   try {
@@ -224,8 +242,8 @@ function mergeTerms(baseList, overrideList) {
 
 function getMergedTerms() {
   const custom = readCustomFromLocal();
-  if (!custom.length) return TERMS;
-  return mergeTerms(TERMS, custom);
+  if (!custom.length) return BASE_TERMS;
+  return mergeTerms(BASE_TERMS, custom);
 }
 
 function syncFromLocalAndRender() {
@@ -235,10 +253,11 @@ function syncFromLocalAndRender() {
 }
 // 注意：不再自动读取 terms.json，仅基于浏览器本地存储渲染
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   updateControlsHeight();
   reevaluateSticky();
-  // 仅合并本地自定义术语，确保后台保存能立即反映到主站
+  // 读取 public/terms.json 并与本地自定义术语合并后渲染
+  await loadBaseTermsFromJson();
   syncFromLocalAndRender();
 });
 window.addEventListener('resize', onResize);
