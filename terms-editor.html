@@ -27,6 +27,34 @@
       .item-term { font-weight: 700; }
       .item-actions { display: flex; gap: 8px; }
       .hint { color: var(--muted); margin-top: 8px; }
+      .category-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+      .category-buttons .category-btn { 
+        padding: 6px 12px; font-size: 13px; border-radius: 8px;
+        border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04);
+        color: var(--text); cursor: pointer; transition: all .2s ease;
+      }
+      .category-buttons .category-btn:hover { 
+        background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.18);
+      }
+      .category-buttons .category-btn.active { 
+        background: linear-gradient(135deg, rgba(124,77,255,.25), rgba(0,229,255,.25));
+        border-color: rgba(124,77,255,.4); color: #ffffff;
+        box-shadow: 0 2px 8px rgba(124,77,255,.3);
+      }
+      /* 列表项中的类别徽章 */
+      .badge { 
+        padding: 4px 10px; border-radius: 999px; font-size: 12px; line-height: 1; 
+        border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: var(--text);
+        white-space: nowrap; align-self: center;
+      }
+      /* 基础：偏黄 */
+      .badge-base { background: linear-gradient(135deg, rgba(255,215,64,.18), rgba(255,193,7,.18)); border-color: rgba(255,193,7,.38); }
+      /* 投资：保持原绿色系 */
+      .badge-invest { background: linear-gradient(135deg, rgba(0,200,83,.18), rgba(0,229,255,.18)); border-color: rgba(0,200,83,.35); }
+      /* 开发：偏红 */
+      .badge-dev { background: linear-gradient(135deg, rgba(244,67,54,.20), rgba(255,82,82,.18)); border-color: rgba(244,67,54,.40); }
+      /* 社区：偏紫 */
+      .badge-community { background: linear-gradient(135deg, rgba(156,39,176,.18), rgba(124,77,255,.18)); border-color: rgba(156,39,176,.38); }
     </style>
   </head>
   <body>
@@ -40,6 +68,15 @@
         <div class="form-row">
           <label for="descInput">解释</label>
           <textarea id="descInput" rows="5" placeholder="请输入该术语的解释"></textarea>
+        </div>
+        <div class="form-row">
+          <label>分类</label>
+          <div class="category-buttons">
+            <button type="button" class="category-btn active" data-category="基础术语">基础术语</button>
+            <button type="button" class="category-btn" data-category="投资术语">投资术语</button>
+            <button type="button" class="category-btn" data-category="开发术语">开发术语</button>
+            <button type="button" class="category-btn" data-category="社区术语">社区术语</button>
+          </div>
         </div>
         <div class="btn-row">
           <button id="addBtn" class="btn">添加到列表</button>
@@ -62,6 +99,7 @@
       const STORAGE_KEY = 'web3_terms_custom';
       const termInput = document.getElementById('termInput');
       const descInput = document.getElementById('descInput');
+      const categoryButtons = document.querySelector('.category-buttons');
       const listEl = document.getElementById('list');
       const fileInput = document.getElementById('fileJson');
 
@@ -89,15 +127,32 @@
             name.textContent = it.term;
             const actions = document.createElement('div');
             actions.className = 'item-actions';
+            // 类别徽章
+            const badge = document.createElement('span');
+            const cat = it.category || '基础术语';
+            const catCls = cat === '基础术语' ? 'badge-base' : cat === '投资术语' ? 'badge-invest' : cat === '开发术语' ? 'badge-dev' : 'badge-community';
+            badge.className = `badge ${catCls}`;
+            badge.textContent = cat;
             const editBtn = document.createElement('button'); editBtn.className = 'btn ghost'; editBtn.textContent = '编辑';
             const delBtn = document.createElement('button'); delBtn.className = 'btn ghost'; delBtn.textContent = '删除';
-            editBtn.addEventListener('click', ()=>{ termInput.value = it.term; descInput.value = it.desc; window.scrollTo({ top: 0, behavior: 'smooth' }); });
+            editBtn.addEventListener('click', ()=>{ 
+              termInput.value = it.term; 
+              descInput.value = it.desc; 
+              // 设置分类按钮状态
+              if (categoryButtons) {
+                categoryButtons.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                const targetBtn = categoryButtons.querySelector(`[data-category="${it.category || '基础术语'}"]`);
+                if (targetBtn) targetBtn.classList.add('active');
+              }
+              window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            });
             // 按术语名删除，避免因排序导致的索引错位
             delBtn.addEventListener('click', ()=>{
               const key = (it.term || '').toLowerCase();
               const idx = items.findIndex(x => (x.term || '').toLowerCase() === key);
               if (idx >= 0) { items.splice(idx, 1); render(); }
             });
+            actions.appendChild(badge);
             actions.appendChild(editBtn); actions.appendChild(delBtn);
             head.appendChild(name); head.appendChild(actions);
             const desc = document.createElement('div'); desc.textContent = it.desc || '';
@@ -111,12 +166,31 @@
         try { const raw = localStorage.getItem(STORAGE_KEY); if (!raw) return; const arr = JSON.parse(raw); if (Array.isArray(arr)) items = arr; } catch {}
       }
 
+      // 分类按钮组事件绑定
+      if (categoryButtons) {
+        categoryButtons.addEventListener('click', (e) => {
+          if (e.target.classList.contains('category-btn')) {
+            categoryButtons.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+          }
+        });
+      }
+
       document.getElementById('addBtn').addEventListener('click', ()=>{
-        const term = normalize(termInput.value); const desc = normalize(descInput.value);
+        const term = normalize(termInput.value); 
+        const desc = normalize(descInput.value); 
+        const activeBtn = categoryButtons && categoryButtons.querySelector('.category-btn.active');
+        const category = activeBtn ? activeBtn.dataset.category : '基础术语';
         if(!term) return alert('请输入术语');
-        dedupePush(items, { term, desc });
+        dedupePush(items, { term, desc, category });
         render();
         termInput.value = ''; descInput.value = '';
+        // 重置分类为默认值
+        if (categoryButtons) {
+          categoryButtons.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+          const defaultBtn = categoryButtons.querySelector('[data-category="基础术语"]');
+          if (defaultBtn) defaultBtn.classList.add('active');
+        }
       });
 
       document.getElementById('saveLocalBtn').addEventListener('click', saveToLocal);
@@ -130,7 +204,7 @@
       fileInput.addEventListener('change', async (e)=>{
         const file = e.target.files && e.target.files[0]; if(!file) return;
         try{ const text = await file.text(); const json = JSON.parse(text); if(!Array.isArray(json)) throw new Error('格式必须是数组');
-          for(const it of json){ if(!it) continue; const term = normalize(it.term || it.name); if(!term) continue; const desc = normalize(it.desc || it.description); dedupePush(items, { term, desc }); }
+          for(const it of json){ if(!it) continue; const term = normalize(it.term || it.name); if(!term) continue; const desc = normalize(it.desc || it.description); const category = (it.category && typeof it.category === 'string') ? it.category : '基础术语'; dedupePush(items, { term, desc, category }); }
           render();
         }catch(err){ alert('导入失败：' + err.message); }
         e.target.value = '';

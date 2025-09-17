@@ -145,6 +145,50 @@ body.has-fixed-controls {
   box-shadow: 0 10px 20px rgba(124,77,255,.25), 0 0 0 1px rgba(255,255,255,.08) inset;
 }
 
+.category-filter {
+  display: flex;
+  gap: 8px;
+  max-width: 980px;
+  margin: 12px auto 8px;
+  padding: 0 12px;
+  overflow-x: auto;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.category-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all .2s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.category-btn:hover {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.18);
+  transform: translateY(-1px);
+}
+
+.category-btn.active {
+  background: linear-gradient(135deg, rgba(124,77,255,.25), rgba(0,229,255,.25));
+  border-color: rgba(124,77,255,.4);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(124,77,255,.3), 0 0 0 1px rgba(255,255,255,.1) inset;
+}
+
+.category-btn.active:hover {
+  background: linear-gradient(135deg, rgba(124,77,255,.35), rgba(0,229,255,.35));
+  box-shadow: 0 6px 20px rgba(124,77,255,.4), 0 0 0 1px rgba(255,255,255,.15) inset;
+  transform: translateY(-2px);
+}
+
 .alpha-index {
   user-select: none;
   display: grid;

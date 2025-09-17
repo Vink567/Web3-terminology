@@ -40,6 +40,15 @@ const A_TO_Z = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i))
 // 与后台工具一致的本地存储键，用于跨页同步自定义术语
 const STORAGE_KEY = 'web3_terms_custom';
 
+// 分类定义与默认分类
+const CATEGORIES = ["基础术语", "投资术语", "开发术语", "社区术语"];
+const DEFAULT_CATEGORY = "基础术语";
+
+function normalizeCategory(raw) {
+  const val = String(raw || "").trim();
+  return CATEGORIES.includes(val) ? val : DEFAULT_CATEGORY;
+}
+
 function updateControlsHeight() {
   const controls = document.querySelector('.controls');
   if (!controls) return;
@@ -163,6 +172,7 @@ let GROUPS = groupTerms(TERMS);
 // 搜索交互：去抖、快捷键
 const inputEl = document.getElementById("searchInput");
 const clearBtn = document.getElementById("clearBtn");
+const categoryFilterEl = document.querySelector(".category-filter");
 
 function debounce(fn, wait = 200) {
   let t = null;
@@ -185,6 +195,22 @@ clearBtn.addEventListener("click", () => {
   inputEl.focus();
 });
 
+// 分类按钮组事件绑定
+if (categoryFilterEl) {
+  categoryFilterEl.addEventListener("click", (e) => {
+    if (e.target.classList.contains("category-btn")) {
+      // 移除所有按钮的 active 类
+      categoryFilterEl.querySelectorAll(".category-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+      // 给当前点击的按钮添加 active 类
+      e.target.classList.add("active");
+      // 重新渲染
+      syncFromLocalAndRender();
+    }
+  });
+}
+
 // JSON 解析工具（供预加载使用）
 function normalizeTerms(json) {
   if (!Array.isArray(json)) return [];
@@ -193,8 +219,9 @@ function normalizeTerms(json) {
     if (!item) continue;
     const term = String(item.term || item.name || '').trim();
     const desc = String(item.desc || item.description || '').trim();
+    const category = normalizeCategory(item.category);
     if (!term) continue;
-    cleaned.push({ term, desc });
+    cleaned.push({ term, desc, category });
   }
   return cleaned;
 }
@@ -231,11 +258,11 @@ function mergeTerms(baseList, overrideList) {
   const map = new Map();
   for (const item of baseList) {
     const key = toPlain(item.term);
-    map.set(key, { term: item.term, desc: item.desc });
+    map.set(key, { term: item.term, desc: item.desc, category: normalizeCategory(item.category) });
   }
   for (const item of overrideList) {
     const key = toPlain(item.term);
-    map.set(key, { term: item.term, desc: item.desc });
+    map.set(key, { term: item.term, desc: item.desc, category: normalizeCategory(item.category) });
   }
   return Array.from(map.values());
 }
@@ -248,7 +275,11 @@ function getMergedTerms() {
 
 function syncFromLocalAndRender() {
   const merged = getMergedTerms();
-  GROUPS = groupTerms(merged);
+  // 获取当前选中的分类按钮
+  const activeBtn = categoryFilterEl && categoryFilterEl.querySelector(".category-btn.active");
+  const selected = activeBtn ? activeBtn.dataset.category : 'ALL';
+  const filtered = selected === 'ALL' ? merged : merged.filter(it => normalizeCategory(it.category) === selected);
+  GROUPS = groupTerms(filtered);
   render(GROUPS, inputEl.value.trim());
 }
 // 注意：不再自动读取 terms.json，仅基于浏览器本地存储渲染
